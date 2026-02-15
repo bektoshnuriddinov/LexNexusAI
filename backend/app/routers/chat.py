@@ -36,12 +36,13 @@ def get_thread_messages(thread_id: str) -> list[dict[str, str]]:
     return [{"role": msg["role"], "content": msg["content"]} for msg in result.data]
 
 
-def user_has_documents(user_id: str) -> bool:
-    """Check if user has any completed documents for RAG."""
+def system_has_documents() -> bool:
+    """Check if system has any completed documents for RAG (shared access model)."""
     supabase = get_supabase_client()
+    # Check if ANY documents exist (not filtered by user - all users can search all docs)
     result = supabase.table("documents").select("id", count="exact").eq(
-        "user_id", user_id
-    ).eq("status", "completed").execute()
+        "status", "completed"
+    ).limit(1).execute()
     return (result.count or 0) > 0
 
 
@@ -88,8 +89,8 @@ async def send_message(
     # Get full message history for context
     messages = get_thread_messages(thread_id)
 
-    # Only provide tools if user has documents
-    tools = RAG_TOOLS if user_has_documents(current_user.id) else None
+    # Only provide tools if system has documents (shared access - admin uploads, all users query)
+    tools = RAG_TOOLS if system_has_documents() else None
 
     async def generate():
         """Generate SSE events with tool-calling loop."""

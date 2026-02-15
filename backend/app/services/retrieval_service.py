@@ -36,7 +36,10 @@ async def search_documents(
     use_reranking: bool = True
 ) -> list[dict]:
     """
-    Search user's documents using hybrid search (vector + keyword) with optional reranking.
+    Search ALL documents using hybrid search (vector + keyword) with optional reranking.
+
+    NOTE: This searches ALL documents in the system (shared access model).
+    Admin uploads documents, all authenticated users can query them.
 
     Hybrid search combines:
     1. Vector search (semantic similarity via embeddings)
@@ -46,7 +49,7 @@ async def search_documents(
 
     Args:
         query: Search query text
-        user_id: User ID for RLS filtering
+        user_id: User ID for logging/context (not used for filtering)
         top_k: Number of final results to return
         threshold: Minimum similarity threshold for vector search
         metadata_filters: Optional metadata filters (e.g., {"document_type": "tutorial"})
