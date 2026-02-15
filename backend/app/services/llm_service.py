@@ -329,7 +329,7 @@ async def astream_chat_response(
     if tools:
         request_kwargs["tools"] = tools
 
-    logger.info(f"🚀 Starting chat completion - Model: {model}, Tools: {len(tools) if tools else 0}")
+    logger.debug(f"Chat completion: model={model}, tools={len(tools) if tools else 0}")
 
     try:
         stream = await client.chat.completions.create(**request_kwargs)

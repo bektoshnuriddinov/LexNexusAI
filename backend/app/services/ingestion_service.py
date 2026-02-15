@@ -49,7 +49,7 @@ async def process_document(document_id: str, user_id: str) -> None:
             raise ValueError("No text content extracted from document")
 
         # Extract metadata from document content
-        logger.info(f"Extracting metadata for document {document_id}")
+        logger.debug(f"Extracting metadata for document {document_id}")
         document_metadata = await extract_metadata(text, doc["filename"])
 
         # Store metadata in documents table

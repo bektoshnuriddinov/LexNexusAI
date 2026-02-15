@@ -73,9 +73,11 @@ async def rerank_chunks(
 
     except httpx.HTTPError as e:
         # Log error but don't fail - fall back to original ranking
-        print(f"Reranking API error: {e}. Falling back to RRF ranking.")
+        import logging
+        logging.error(f"Reranking API error: {e}. Falling back to RRF ranking.")
         return chunks[:top_n]
     except (KeyError, IndexError) as e:
         # Handle unexpected response format
-        print(f"Reranking response parsing error: {e}. Falling back to RRF ranking.")
+        import logging
+        logging.error(f"Reranking response parsing error: {e}. Falling back to RRF ranking.")
         return chunks[:top_n]

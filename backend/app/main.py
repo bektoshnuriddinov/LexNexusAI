@@ -62,8 +62,8 @@ app.add_middleware(
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Catch all unhandled exceptions and return proper JSON response with CORS headers."""
-    print(f"Unhandled exception: {exc}")
-    traceback.print_exc()
+    logger.error(f"Unhandled exception: {exc}")
+    logger.error(traceback.format_exc())
     return JSONResponse(
         status_code=500,
         content={"detail": f"Internal server error: {str(exc)}"}

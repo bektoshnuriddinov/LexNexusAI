@@ -24,25 +24,23 @@ from openai import OpenAI, AsyncOpenAI
 # Log LangSmith configuration for debugging
 if settings.langsmith_api_key:
     api_key_preview = settings.langsmith_api_key[:8] + "..." if len(settings.langsmith_api_key) > 8 else "***"
-    logger.info(f"✅ LangSmith SDK version: {langsmith.__version__}")
-    logger.info(f"✅ LangSmith project: {settings.langsmith_project}")
-    logger.info(f"✅ LangSmith endpoint: {os.environ.get('LANGSMITH_ENDPOINT')}")
-    logger.info(f"✅ LangSmith API key: {api_key_preview}")
-    logger.info(f"✅ LangSmith tracing: {os.environ.get('LANGSMITH_TRACING')}")
+    logger.info(f"LangSmith enabled: project={settings.langsmith_project}")
+    logger.debug(f"LangSmith SDK version: {langsmith.__version__}")
+    logger.debug(f"LangSmith API key: {api_key_preview}")
 
     # Test LangSmith connectivity on startup
     try:
         from langsmith import Client
         ls_client = Client()
-        logger.info(f"✅ LangSmith client initialized successfully")
+        logger.debug("LangSmith client initialized")
 
         # Test trace
         with langsmith.trace("startup_test", project_name=settings.langsmith_project) as run:
             run.end(outputs={"status": "LangSmith connection verified"})
-        logger.info(f"✅ Startup test trace sent successfully")
+        logger.debug("LangSmith test trace sent")
     except Exception as e:
-        logger.error(f"❌ LangSmith startup test failed: {e}")
-        logger.error(f"   Traces may not appear in dashboard")
+        logger.error(f"LangSmith startup test failed: {e}")
+        logger.error("Traces may not appear in dashboard")
 
 
 def get_traced_openai_client(base_url: str | None = None, api_key: str | None = None) -> OpenAI:
@@ -58,7 +56,7 @@ def get_traced_openai_client(base_url: str | None = None, api_key: str | None = 
 
     if settings.langsmith_api_key:
         wrapped = wrap_openai(client)
-        logger.info(f"OpenAI client wrapped with LangSmith tracing (base_url={base_url})")
+        logger.debug(f"OpenAI client wrapped with LangSmith (base_url={base_url})")
         return wrapped
 
     return client
@@ -78,13 +76,11 @@ def get_traced_async_openai_client(base_url: str | None = None, api_key: str | N
     if settings.langsmith_api_key:
         try:
             wrapped = wrap_openai(client)
-            logger.info(f"✅ AsyncOpenAI client wrapped with LangSmith tracing")
-            logger.info(f"   Base URL: {base_url or 'default (OpenAI)'}")
-            logger.info(f"   Project: {settings.langsmith_project}")
+            logger.debug(f"AsyncOpenAI wrapped with LangSmith (base_url={base_url or 'default'}, project={settings.langsmith_project})")
             return wrapped
         except Exception as e:
-            logger.error(f"❌ Failed to wrap AsyncOpenAI client: {e}")
+            logger.error(f"Failed to wrap AsyncOpenAI client: {e}")
             return client
     else:
-        logger.warning("⚠️  LangSmith tracing disabled (no API key)")
+        logger.warning("LangSmith tracing disabled (no API key)")
         return client

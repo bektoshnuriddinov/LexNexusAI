@@ -44,7 +44,6 @@ async def get_current_user(
         # Query user_profiles for admin status
         try:
             response = supabase.table("user_profiles").select("is_admin").eq("id", user_id).single().execute()
-            print(f"Supabase response for user_profiles query: {response}")
             is_admin = response.data.get("is_admin", False) if response.data else False
         except Exception as e:
             # If user_profiles table doesn't exist or query fails, user is not admin

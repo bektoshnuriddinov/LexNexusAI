@@ -181,7 +181,7 @@ def extract_text(file_bytes: bytes, file_type: str) -> str:
         - application/vnd.openxmlformats-officedocument.wordprocessingml.document (.docx)
         - text/html (.html, .htm)
     """
-    logger.info(f"Extracting text from file type: {file_type}")
+    logger.debug(f"Extracting text from file type: {file_type}")
 
     try:
         # Plain text and Markdown (existing support)

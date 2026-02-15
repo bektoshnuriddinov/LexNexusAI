@@ -122,7 +122,6 @@ export async function sendMessage(options: SendMessageOptions): Promise<void> {
       if (done) break
 
       const chunk = decoder.decode(value, { stream: true })
-      console.log('[SSE] Chunk received:', chunk.length, 'bytes at', Date.now())
       buffer += chunk
       const lines = buffer.split('\n')
       buffer = lines.pop() || ''

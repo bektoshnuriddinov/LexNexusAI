@@ -55,21 +55,21 @@ async def search_documents(
     Returns:
         List of reranked chunks with relevance scores
     """
-    logger.info(f"🔍 SEARCH START - Query: '{query}' | User: {user_id[:8]}...")
+    logger.debug(f"Search query: '{query}' for user {user_id[:8]}")
 
     # Normalize query to handle apostrophe variations
     normalized_query = normalize_query(query)
-    logger.info(f"📝 Normalized query: '{query}' → '{normalized_query}'")
+    logger.debug(f"Normalized query: '{query}' → '{normalized_query}'")
 
     # Get embeddings for both original and normalized query to improve matching
     queries_to_embed = [normalized_query]
     if normalized_query != query:
         queries_to_embed.append(query)
 
-    logger.info(f"🧮 Generating embeddings for {len(queries_to_embed)} query variant(s)...")
+    logger.debug(f"Generating embeddings for {len(queries_to_embed)} query variant(s)")
     embeddings = await get_embeddings(queries_to_embed, user_id=user_id)
     query_embedding = embeddings[0]  # Use normalized query embedding
-    logger.info(f"✓ Embedding generated: {len(query_embedding)} dimensions")
+    logger.debug(f"Embedding generated: {len(query_embedding)} dimensions")
 
     # Call hybrid search RPC (combines vector + keyword + RRF)
     supabase = get_supabase_client()
@@ -84,36 +84,36 @@ async def search_documents(
         "rrf_k": 60  # RRF constant (standard value)
     }
 
-    logger.info(f"🔎 Calling hybrid_search_chunks RPC with threshold={threshold}, match_count={rpc_params['match_count']}, final_count={rpc_params['final_count']}")
+    logger.debug(f"Hybrid search RPC: threshold={threshold}, match_count={rpc_params['match_count']}, final_count={rpc_params['final_count']}")
     result = supabase.rpc("hybrid_search_chunks", rpc_params).execute()
     chunks = result.data or []
 
-    logger.info(f"📊 Hybrid search returned {len(chunks)} chunks")
+    logger.debug(f"Hybrid search returned {len(chunks)} chunks")
 
     if not chunks:
-        logger.warning("⚠️  NO CHUNKS FOUND - search returned empty")
+        logger.debug("No chunks found for query")
         return []
 
-    # Log chunk details
+    # Log chunk details in debug mode
     for i, chunk in enumerate(chunks[:3], 1):  # Log first 3
-        logger.info(f"  Chunk {i}: vec_sim={chunk.get('vector_similarity', 0):.3f}, "
+        logger.debug(f"Chunk {i}: vec_sim={chunk.get('vector_similarity', 0):.3f}, "
                    f"kw_rank={chunk.get('keyword_rank', 0):.3f}, "
                    f"rrf={chunk.get('rrf_score', 0):.4f}")
 
     # Apply reranking if enabled
     if use_reranking:
-        logger.info(f"🔄 Applying reranking (top_n={top_k})...")
+        logger.debug(f"Applying reranking (top_n={top_k})")
         chunks = await rerank_chunks(query, chunks, top_n=top_k)
-        logger.info(f"✓ Reranking complete - {len(chunks)} chunks after reranking")
+        logger.debug(f"Reranking complete: {len(chunks)} chunks")
         # Normalize: use rerank_score as similarity
         for chunk in chunks:
             chunk['similarity'] = chunk.get('rerank_score', chunk.get('rrf_score', 0))
     else:
-        logger.info(f"⏭️  Skipping reranking - using top {top_k} RRF results")
+        logger.debug(f"Using top {top_k} RRF results without reranking")
         chunks = chunks[:top_k]
         # Normalize: use rrf_score as similarity
         for chunk in chunks:
             chunk['similarity'] = chunk.get('rrf_score', 0)
 
-    logger.info(f"✅ SEARCH COMPLETE - Returning {len(chunks)} chunks")
+    logger.debug(f"Search complete: returning {len(chunks)} chunks")
     return chunks

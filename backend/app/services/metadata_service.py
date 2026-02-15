@@ -92,7 +92,7 @@ Be concise and accurate. If information is not present, use appropriate defaults
         )
 
         metadata = completion.choices[0].message.parsed
-        logger.info(f"Extracted metadata for {filename}: {metadata.document_type}, {len(metadata.topics)} topics")
+        logger.debug(f"Extracted metadata for {filename}: {metadata.document_type}, {len(metadata.topics)} topics")
 
         return metadata
 
