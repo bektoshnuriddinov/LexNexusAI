@@ -1,4 +1,4 @@
-# Agentic RAG Masterclass
+# Agentic RAG Masterclass Bektosh Nuriddinov
 
 Build a RAG application using AI coding tools. Learn the concepts, prompt Claude Code to build each piece.
 
@@ -7,7 +7,6 @@ Build a RAG application using AI coding tools. Learn the concepts, prompt Claude
 - Chat interface with threaded conversations
 - Document ingestion with drag-and-drop
 - Full RAG pipeline: chunking, embedding, retrieval, reranking
-- Agentic patterns: sub-agents, context management
 
 ## Stack
 
