@@ -12,7 +12,7 @@ interface User {
 }
 
 export function AdminPage() {
-  const { user, getAccessToken } = useAuth()
+  const { isAdmin, getAccessToken } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -21,7 +21,7 @@ export function AdminPage() {
   // Form state
   const [newEmail, setNewEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
 
   useEffect(() => {
     loadUsers()
@@ -66,7 +66,7 @@ export function AdminPage() {
         body: JSON.stringify({
           email: newEmail,
           password: newPassword,
-          is_admin: isAdmin
+          is_admin: newUserIsAdmin
         })
       })
 
@@ -78,7 +78,7 @@ export function AdminPage() {
       // Reset form
       setNewEmail('')
       setNewPassword('')
-      setIsAdmin(false)
+      setNewUserIsAdmin(false)
 
       // Reload users list
       await loadUsers()
@@ -117,7 +117,7 @@ export function AdminPage() {
     }
   }
 
-  if (!user?.is_admin) {
+  if (!isAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -174,8 +174,8 @@ export function AdminPage() {
               <input
                 type="checkbox"
                 id="is-admin"
-                checked={isAdmin}
-                onChange={(e) => setIsAdmin(e.target.checked)}
+                checked={newUserIsAdmin}
+                onChange={(e) => setNewUserIsAdmin(e.target.checked)}
                 className="h-4 w-4"
               />
               <label htmlFor="is-admin" className="text-sm font-medium">

@@ -74,7 +74,6 @@ export function ChatView({ threadId, onThreadTitleUpdate, initialMessage }: Chat
       id: `temp-${Date.now()}`,
       thread_id: threadId,
       user_id: '',
-      openai_message_id: null,
       role: 'user',
       content: userMessage,
       created_at: new Date().toISOString(),
