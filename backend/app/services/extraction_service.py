@@ -9,6 +9,42 @@ import html2text
 logger = logging.getLogger(__name__)
 
 
+def normalize_text(text: str) -> str:
+    """
+    Normalize extracted text to handle legal document notation.
+
+    Handles:
+    - Superscript numbers (e.g., 509⁶ → "509⁶ (509-6)" - keeps original + adds searchable version)
+    - Preserves original formatting while adding normalized versions
+    """
+    if not text:
+        return text
+
+    import re
+
+    # Superscript to regular number mapping
+    superscript_map = {
+        '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+        '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9'
+    }
+
+    # Match number followed by one or more superscripts
+    # Example: "497²⁶" → base_num="497", superscripts="²⁶"
+    pattern = r'(\d+)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)'
+
+    def replace_superscript(match):
+        base_num = match.group(1)
+        superscripts = match.group(2)
+        # Convert superscripts to regular numbers: "²⁶" → "26"
+        regular_nums = ''.join(superscript_map.get(s, s) for s in superscripts)
+        # Keep original and add normalized version: "497²⁶ (497-26)"
+        return f"{base_num}{superscripts} ({base_num}-{regular_nums})"
+
+    # Run replacement once on entire text
+    normalized = re.sub(pattern, replace_superscript, text)
+    return normalized
+
+
 def extract_text_from_pdf(file_bytes: bytes) -> str:
     """
     Extract text from PDF using pypdf.
@@ -46,7 +82,7 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
         if not full_text.strip():
             raise ValueError("PDF appears to be empty or contains only images")
 
-        return full_text
+        return normalize_text(full_text)
 
     except ValueError:
         raise
@@ -93,7 +129,7 @@ def extract_text_from_docx(file_bytes: bytes) -> str:
         if not full_text.strip():
             raise ValueError("DOCX appears to be empty")
 
-        return full_text
+        return normalize_text(full_text)
 
     except ValueError:
         raise
@@ -147,9 +183,9 @@ def extract_text_from_html(file_bytes: bytes) -> str:
             if not plain_text.strip():
                 raise ValueError("No text content extracted from HTML (document appears to be empty)")
 
-            return plain_text
+            return normalize_text(plain_text)
 
-        return markdown_text
+        return normalize_text(markdown_text)
 
     except ValueError:
         raise

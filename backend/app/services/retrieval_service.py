@@ -10,20 +10,40 @@ logger = logging.getLogger(__name__)
 def normalize_query(query: str) -> str:
     """
     Normalize query text to handle common variations and typos.
-    Particularly important for Uzbek text with apostrophes.
+    Particularly important for Uzbek text with apostrophes and legal document notation.
+
+    Handles:
+    - Apostrophe variants (Uzbek text)
+    - Superscript numbers (e.g., 509⁶ → "509 6" or "509-6")
+    - Legal notation (e.g., "509⁶" → "509-modda 6-qism")
     """
-    # Replace ALL apostrophe/quote variants with standard apostrophe
+    normalized = query
+
+    # 1. Normalize superscript numbers to regular numbers
+    # Common in legal texts: 509⁶ means Article 509, Part 6
+    superscript_map = {
+        '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+        '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9'
+    }
+
+    # Replace superscripts with space + regular number
+    # 509⁶ → "509 6" (helps search match both formats)
+    for superscript, regular in superscript_map.items():
+        if superscript in normalized:
+            normalized = normalized.replace(superscript, f' {regular}')
+
+    # 2. Replace ALL apostrophe/quote variants with standard apostrophe
     # Uzbek text uses many Unicode variants: ʻ (U+02BB), ʼ (U+02BC), ' (U+2019), etc.
     apostrophe_variants = [
         "'", "ʻ", "'", "`", "ʼ", "´", "ʹ", "ˈ", "'", "‛", "′", "ʹ",  # Various apostrophes
         "ʻ", "ʼ", "ˊ", "ˋ", "˴"  # Modifier letters
     ]
-    normalized = query
     for variant in apostrophe_variants:
         normalized = normalized.replace(variant, "'")
 
-    # Also remove apostrophes entirely to create a fallback version
-    # This helps match "talim" with "ta'lim"
+    # 3. Clean up extra whitespace
+    normalized = ' '.join(normalized.split())
+
     return normalized
 
 

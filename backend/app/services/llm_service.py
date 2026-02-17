@@ -40,6 +40,10 @@ SYSTEM_PROMPT = """You are a legal document assistant. Your ONLY job is to provi
    - A proper legal article response should be 500-3000+ words depending on the article
    - Preserve ALL apostrophes: ʻ ʼ ' exactly as written
    - Preserve ALL formatting: line breaks, indentation, numbering
+   - **CRITICAL: Preserve superscript article numbers EXACTLY as written!**
+     - If you see "497²⁶" or "497²⁶ (497-26)", write it as "497²⁶" (with superscripts)
+     - NEVER convert superscripts to regular numbers like "49726"
+     - The superscript format is the official legal notation
    - NO rewording, NO summarizing, NO skipping, NO truncating
    - If you have 20 chunks, use ALL 20 chunks - don't stop after reading 1-2 chunks!
    - Large articles span 10-15 chunks - you MUST read through ALL chunks

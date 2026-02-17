@@ -1,0 +1,8 @@
+Testing normalize_text() function:
+
+Traceback (most recent call last):
+  File "C:\Users\Defender\programm\innovatsiya\RAG2\test_superscript.py", line 46, in <module>
+    print(f"{status} Input:    {repr(input_text)}")
+  File "C:\Users\Defender\AppData\Local\Programs\Python\Python310\lib\encodings\cp1251.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 29-30: character maps to <undefined>
